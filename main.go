@@ -6,8 +6,11 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
+
+	"github.com/urfave/cli"
 
 	"github.com/dustin/go-humanize"
 	"pault.ag/go/piv"
@@ -225,12 +228,38 @@ func hexDump(els []byte, perLine, indent uint, startIndent bool) string {
 }
 
 func main() {
-	roots, ints, err := loadCerts(os.Args[1])
-	ohshit(err)
+	app := cli.NewApp()
+	app.Name = "certdump"
+	app.Usage = "dump certs"
+	app.Action = Main
 
-	cert, err := loadCert(os.Args[2])
-	ohshit(err)
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:   "ca",
+			Value:  "",
+			EnvVar: "CERTDUMP_CA_FILEPATH",
+			Usage:  "path on the filesystem to a file full of pem CAs",
+		},
 
+		cli.BoolFlag{
+			Name:  "text",
+			Usage: "output text from inside the cert",
+		},
+
+		cli.BoolTFlag{
+			Name:  "validate",
+			Usage: "validate cert and print chains",
+		},
+	}
+
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func printChain(roots, ints *x509.CertPool, cert *x509.Certificate) {
 	chains, err := cert.Verify(x509.VerifyOptions{
 		Roots:         roots,
 		Intermediates: ints,
@@ -250,7 +279,34 @@ func main() {
 		fmt.Printf("\n")
 	}
 
-	pcert, err := piv.NewCertificate(cert)
+}
+
+func Main(c *cli.Context) {
+	caFilePath := c.String("ca")
+	if len(caFilePath) == 0 {
+		cli.ShowAppHelpAndExit(c, 1)
+	}
+
+	validate := c.Bool("validate")
+	text := c.Bool("text")
+
+	roots, ints, err := loadCerts(caFilePath)
 	ohshit(err)
-	printCert(pcert)
+
+	for _, path := range c.Args() {
+		fmt.Printf("%s\n", path)
+
+		cert, err := loadCert(path)
+		ohshit(err)
+
+		if validate {
+			printChain(roots, ints, cert)
+		}
+
+		if text {
+			pcert, err := piv.NewCertificate(cert)
+			ohshit(err)
+			printCert(pcert)
+		}
+	}
 }
