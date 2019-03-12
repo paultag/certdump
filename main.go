@@ -241,7 +241,7 @@ func main() {
 			Usage:  "path on the filesystem to a file full of pem CAs",
 		},
 
-		cli.BoolFlag{
+		cli.BoolTFlag{
 			Name:  "text",
 			Usage: "output text from inside the cert",
 		},
@@ -272,9 +272,45 @@ func printChain(roots, ints *x509.CertPool, cert *x509.Certificate) {
 
 	for i, chain := range chains {
 		fmt.Printf("Chain %d\n", i)
-		for j := len(chain) - 1; j >= 0; j-- {
-			cert := chain[j]
-			fmt.Printf(" - %s\n", cert.Subject.CommonName)
+		for i := 0; i < len(chain); i++ {
+			cert := chain[len(chain)-(i+1)]
+
+			indentString := strings.Repeat(" ", i*2) + "└"
+			if i == 0 {
+				indentString = "•"
+			}
+
+			what := ""
+			if cert.IsCA {
+				what = "authority"
+			} else {
+				usages := []string{}
+
+				switch {
+				case cert.KeyUsage&x509.KeyUsageDigitalSignature != 0:
+					usages = append(usages, "signature")
+				case cert.KeyUsage&x509.KeyUsageKeyEncipherment != 0:
+					usages = append(usages, "key-exchange")
+				}
+				for _, usage := range cert.ExtKeyUsage {
+					switch usage {
+					case x509.ExtKeyUsageServerAuth:
+						usages = append(usages, "server")
+					case x509.ExtKeyUsageClientAuth:
+						usages = append(usages, "client")
+					case x509.ExtKeyUsageEmailProtection:
+						usages = append(usages, "s/mime")
+					}
+				}
+				what = strings.Join(usages, ", ")
+			}
+
+			fmt.Printf(
+				"%s %s (%s)\n",
+				indentString,
+				cert.Subject.CommonName,
+				what,
+			)
 		}
 		fmt.Printf("\n")
 	}
