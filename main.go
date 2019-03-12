@@ -316,7 +316,7 @@ func printChain(roots, ints *x509.CertPool, cert *x509.Certificate) {
 			}
 
 			fmt.Printf(
-				"%s %s (%s)\n",
+				" %s %s (%s)\n",
 				indentString,
 				cert.Subject.CommonName,
 				what,
@@ -347,7 +347,7 @@ func Main(c *cli.Context) {
 			log.Printf("Error loading %s formated cert: %s\n", format, err)
 			continue
 		}
-		fmt.Printf("Certificate format: %s\n\n", format)
+		fmt.Printf("\nCertificate format: %s\n\n", format)
 
 		if validate {
 			printChain(roots, ints, cert)
