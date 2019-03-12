@@ -59,19 +59,22 @@ func loadCerts(path string) (*x509.CertPool, *x509.CertPool, error) {
 	return rootsPool, intPool, nil
 }
 
-func loadCert(path string) (*x509.Certificate, error) {
+func loadCert(path string) (*x509.Certificate, string, error) {
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
+	format := "der"
 
 	if bytes[0] == '-' && bytes[1] == '-' {
 		/* attempt to try it as pem */
 		block, _ := pem.Decode(bytes)
 		bytes = block.Bytes
+		format = "pem"
 	}
 
-	return x509.ParseCertificate(bytes)
+	c, err := x509.ParseCertificate(bytes)
+	return c, format, err
 }
 
 func ohshit(err error) {
@@ -339,11 +342,12 @@ func Main(c *cli.Context) {
 	for _, path := range c.Args() {
 		fmt.Printf("%s\n", path)
 
-		cert, err := loadCert(path)
+		cert, format, err := loadCert(path)
 		if err != nil {
-			log.Printf("Error loading cert: %s\n", err)
+			log.Printf("Error loading %s formated cert: %s\n", format, err)
 			continue
 		}
+		fmt.Printf("Certificate format: %s\n\n", format)
 
 		if validate {
 			printChain(roots, ints, cert)
