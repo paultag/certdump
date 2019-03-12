@@ -64,6 +64,13 @@ func loadCert(path string) (*x509.Certificate, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if bytes[0] == '-' && bytes[1] == '-' {
+		/* attempt to try it as pem */
+		block, _ := pem.Decode(bytes)
+		bytes = block.Bytes
+	}
+
 	return x509.ParseCertificate(bytes)
 }
 
