@@ -297,7 +297,10 @@ func Main(c *cli.Context) {
 		fmt.Printf("%s\n", path)
 
 		cert, err := loadCert(path)
-		ohshit(err)
+		if err != nil {
+			log.Printf("Error loading cert: %s\n", err)
+			continue
+		}
 
 		if validate {
 			printChain(roots, ints, cert)
@@ -305,7 +308,10 @@ func Main(c *cli.Context) {
 
 		if text {
 			pcert, err := piv.NewCertificate(cert)
-			ohshit(err)
+			if err != nil {
+				log.Printf("Error parsing PIV: %s\n", err)
+				continue
+			}
 			printCert(pcert)
 		}
 	}
