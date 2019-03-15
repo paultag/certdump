@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/asn1"
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
@@ -200,6 +201,34 @@ func printCert(cert *piv.Certificate) {
 		fmt.Printf("\n")
 	}
 
+	fmt.Printf("    Present Extensions:\n")
+	name := "unknown"
+	for _, extension := range cert.Extensions {
+		switch {
+		case extension.Id.Equal(asn1.ObjectIdentifier{2, 5, 29, 14}):
+			name = "subject key id"
+		case extension.Id.Equal(asn1.ObjectIdentifier{2, 5, 29, 15}):
+			name = "key usage"
+		case extension.Id.Equal(asn1.ObjectIdentifier{2, 5, 29, 37}):
+			name = "extended key usage"
+		case extension.Id.Equal(asn1.ObjectIdentifier{2, 5, 29, 35}):
+			name = "authority key id"
+		case extension.Id.Equal(asn1.ObjectIdentifier{2, 5, 29, 19}):
+			name = "basic constraints"
+		case extension.Id.Equal(asn1.ObjectIdentifier{2, 5, 29, 17}):
+			name = "subject alt name"
+		case extension.Id.Equal(asn1.ObjectIdentifier{2, 5, 29, 32}):
+			name = "policies"
+		case extension.Id.Equal(asn1.ObjectIdentifier{2, 5, 29, 30}):
+			name = "name constraint"
+		case extension.Id.Equal(asn1.ObjectIdentifier{2, 5, 29, 31}):
+			name = "crl distribution points"
+		case extension.Id.Equal(asn1.ObjectIdentifier{1, 3, 6, 1, 5, 5, 7, 1, 1}):
+			name = "authority info"
+		}
+		fmt.Printf("        %s (%s)\n", extension.Id, name)
+	}
+	fmt.Printf("\n")
 }
 
 func maybePrint(name string, els []string) {
