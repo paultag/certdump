@@ -10,11 +10,12 @@ import (
 	"log"
 	"os"
 	"strings"
-
-	"github.com/urfave/cli"
+	"time"
 
 	"github.com/dustin/go-humanize"
+	"github.com/urfave/cli"
 	"pault.ag/go/piv"
+	"pault.ag/go/technicolor"
 )
 
 func loadCerts(path string) (*x509.CertPool, *x509.CertPool, error) {
@@ -60,6 +61,30 @@ func loadCerts(path string) (*x509.CertPool, *x509.CertPool, error) {
 	return rootsPool, intPool, nil
 }
 
+func printTime(name string, when time.Time, color bool) {
+	fmt.Printf("           %s:", name)
+	output := technicolor.NewTerminalWriter(os.Stdout)
+
+	diff := when.Sub(time.Now())
+
+	if color {
+		switch {
+		case diff < 0:
+			output = output.Bold().Red()
+		case diff < (time.Hour * 720):
+			output = output.Yellow()
+		case diff > 0:
+			output = output.Green()
+		}
+	}
+
+	output.Printf(` %s
+	              %s
+`, humanize.Time(when), when)
+
+	output.ResetColor().Write([]byte{})
+}
+
 func loadCert(path string) (*x509.Certificate, string, error) {
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -92,17 +117,11 @@ func printCert(cert *piv.Certificate) {
 	fmt.Printf("    Signature Algorithm: %s\n", cert.SignatureAlgorithm)
 	fmt.Printf("\n")
 
-	fmt.Printf(`    Validity:
-        Not Before: %s
-                    (%s)
-        Not After:  %s
-                    (%s)
-`,
-		humanize.Time(cert.NotBefore),
-		cert.NotBefore,
-		humanize.Time(cert.NotAfter),
-		cert.NotAfter,
-	)
+	fmt.Printf("    Validity:\n")
+
+	printTime("Not Before", cert.NotBefore, false)
+	printTime("Not After", cert.NotAfter, true)
+
 	fmt.Printf("\n")
 	fmt.Printf("    Subject: %s\n", cert.Subject.String())
 
@@ -304,10 +323,14 @@ func printChain(roots, ints *x509.CertPool, cert *x509.Certificate) {
 		Intermediates: ints,
 		KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
 	})
+	output := technicolor.NewTerminalWriter(os.Stdout)
 	if err != nil {
-		fmt.Printf("Can't verify Certificate: %s\n", err)
-		fmt.Printf("\n")
+		output.Red().Bold().Printf(
+			"Can't verify Certificate: %s\n", err)
+	} else {
+		output.Green().Printf("Certificate is valid!\n")
 	}
+	output.ResetColor().Write([]byte("\n"))
 
 	for i, chain := range chains {
 		fmt.Printf("Chain %d\n", i)
@@ -368,12 +391,16 @@ func Main(c *cli.Context) {
 	roots, ints, err := loadCerts(caFilePath)
 	ohshit(err)
 
+	output := technicolor.NewTerminalWriter(os.Stdout)
+
 	for _, path := range c.Args() {
 		fmt.Printf("%s\n", path)
 
 		cert, format, err := loadCert(path)
 		if err != nil {
-			log.Printf("Error loading %s formated cert: %s\n", format, err)
+			output.Red().Bold().Printf(
+				"Error loading %s formated cert: %s\n", format, err)
+			output.ResetColor().Write([]byte{})
 			continue
 		}
 		fmt.Printf("\nCertificate format: %s\n\n", format)
