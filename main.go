@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/asn1"
+	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
@@ -334,6 +335,11 @@ func main() {
 			Usage:  "path on the filesystem to a file full of pem CAs",
 		},
 
+		cli.BoolFlag{
+			Name:  "json",
+			Usage: "output cert as a JSON blob",
+		},
+
 		cli.BoolTFlag{
 			Name:  "text",
 			Usage: "output text from inside the cert",
@@ -419,6 +425,14 @@ func Main(c *cli.Context) {
 
 	validate := c.Bool("validate")
 	text := c.Bool("text")
+	outputJson := c.Bool("json")
+
+	quiet := false
+	if outputJson {
+		quiet = true
+		text = false
+		validate = false
+	}
 
 	var err error
 	roots := x509.NewCertPool()
@@ -432,7 +446,9 @@ func Main(c *cli.Context) {
 	output := technicolor.NewTerminalWriter(os.Stdout)
 
 	for _, path := range c.Args() {
-		fmt.Printf("%s\n", path)
+		if !quiet {
+			fmt.Printf("%s\n", path)
+		}
 
 		cert, format, err := loadCert(path)
 		if err != nil {
@@ -441,19 +457,27 @@ func Main(c *cli.Context) {
 			output.ResetColor().Write([]byte{})
 			continue
 		}
-		fmt.Printf("\nCertificate format: %s\n\n", format)
+		if !quiet {
+			fmt.Printf("\nCertificate format: %s\n\n", format)
+		}
 
 		if validate {
 			printChain(roots, ints, cert)
 		}
 
+		pcert, err := piv.NewCertificate(cert)
+		if err != nil {
+			log.Printf("Error parsing PIV: %s\n", err)
+			continue
+		}
+
 		if text {
-			pcert, err := piv.NewCertificate(cert)
-			if err != nil {
-				log.Printf("Error parsing PIV: %s\n", err)
-				continue
-			}
 			printCert(pcert)
 		}
+
+		if outputJson {
+			ohshit(json.NewEncoder(os.Stdout).Encode(pcert))
+		}
+
 	}
 }
