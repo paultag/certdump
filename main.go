@@ -110,7 +110,6 @@ func ohshit(err error) {
 }
 
 func printCert(cert *piv.Certificate) {
-
 	fmt.Printf("Certificate:\n")
 	fmt.Printf("    Version:             %d\n", cert.Version)
 	fmt.Printf("    Serial Number:       %d (0x%x)\n", cert.SerialNumber, cert.SerialNumber)
@@ -138,6 +137,19 @@ func printCert(cert *piv.Certificate) {
 			*cert.CompletedNACI)
 		fmt.Printf("\n")
 	}
+
+	if len(cert.Policies) != 0 {
+		fmt.Printf("    PKI Policies\n")
+		for _, policy := range cert.Policies {
+			fmt.Printf("        %s:\n", policy.Name)
+			fmt.Printf("          OID:      %s\n", policy.Id.String())
+			fmt.Printf("          Person:   %t\n", policy.Issued.Person)
+			fmt.Printf("          Hardware: %t\n", policy.Issued.Hardware)
+		}
+	} else {
+		fmt.Printf("    No PKI Policies found! This is bad!\n")
+	}
+	fmt.Printf("\n")
 
 	if len(cert.FASCs) != 0 {
 		for _, fasc := range cert.FASCs {
