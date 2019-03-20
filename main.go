@@ -144,9 +144,16 @@ func printCert(cert *piv.Certificate) {
 			fmt.Printf("        %s:\n", policy.Name)
 			fmt.Printf("          OID:      %s\n", policy.Id.String())
 			fmt.Printf("          Person:   %t\n", policy.Issued.Person)
-			fmt.Printf("          Hardware: %t\n", policy.Issued.Hardware)
 
 			output := technicolor.NewTerminalWriter(os.Stdout)
+			if policy.Issued.Hardware {
+				output = output.Green()
+			} else {
+				output = output.Red().Bold()
+			}
+			output.Printf("          Hardware: %t", policy.Issued.Hardware)
+			output.ResetColor().Write([]byte("\n"))
+
 			switch policy.Issued.AssuranceLevel {
 			case piv.RudimentaryAssurance:
 				output = output.Red().Bold()
