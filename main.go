@@ -416,15 +416,18 @@ func printChain(roots, ints *x509.CertPool, cert *x509.Certificate) {
 
 func Main(c *cli.Context) {
 	caFilePath := c.String("ca")
-	if len(caFilePath) == 0 {
-		cli.ShowAppHelpAndExit(c, 1)
-	}
 
 	validate := c.Bool("validate")
 	text := c.Bool("text")
 
-	roots, ints, err := loadCerts(caFilePath)
-	ohshit(err)
+	var err error
+	roots := x509.NewCertPool()
+	ints := x509.NewCertPool()
+
+	if len(caFilePath) != 0 {
+		roots, ints, err = loadCerts(caFilePath)
+		ohshit(err)
+	}
 
 	output := technicolor.NewTerminalWriter(os.Stdout)
 
