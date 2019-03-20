@@ -145,6 +145,7 @@ func printCert(cert *piv.Certificate) {
 			fmt.Printf("          OID:      %s\n", policy.Id.String())
 			fmt.Printf("          Person:   %t\n", policy.Issued.Person)
 			fmt.Printf("          Hardware: %t\n", policy.Issued.Hardware)
+			fmt.Printf("          LOA:      %s\n", policy.Issued.AssuranceLevel)
 			fmt.Printf("\n")
 		}
 	} else {
