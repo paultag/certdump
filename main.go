@@ -145,11 +145,12 @@ func printCert(cert *piv.Certificate) {
 			fmt.Printf("          OID:      %s\n", policy.Id.String())
 			fmt.Printf("          Person:   %t\n", policy.Issued.Person)
 			fmt.Printf("          Hardware: %t\n", policy.Issued.Hardware)
+			fmt.Printf("\n")
 		}
 	} else {
 		fmt.Printf("    No PKI Policies found! This is bad!\n")
+		fmt.Printf("\n")
 	}
-	fmt.Printf("\n")
 
 	if len(cert.FASCs) != 0 {
 		for _, fasc := range cert.FASCs {
