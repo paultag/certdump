@@ -139,8 +139,9 @@ func printCert(cert *piv.Certificate) {
 		fmt.Printf("\n")
 	}
 
+	fmt.Printf("    PKI Policies\n")
+	fmt.Printf("        Highest LOA: %s\n\n", cert.Policies.HighestAssurance())
 	if len(cert.Policies) != 0 {
-		fmt.Printf("    PKI Policies\n")
 		for _, policy := range cert.Policies {
 			fmt.Printf("        %s:\n", policy.Name)
 			fmt.Printf("          OID:      %s\n", policy.Id.String())
