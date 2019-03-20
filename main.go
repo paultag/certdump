@@ -148,7 +148,7 @@ func printCert(cert *piv.Certificate) {
 			fmt.Printf("\n")
 		}
 	} else {
-		fmt.Printf("    No PKI Policies found! This is bad!\n")
+		fmt.Printf("    No PIV PKI Policies found!\n")
 		fmt.Printf("\n")
 	}
 
