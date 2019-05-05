@@ -3,9 +3,11 @@ Section: devel
 Priority: extra
 Maintainer: Paul Tagliamonte <paultag@gmail.com>
 Build-Depends: debhelper (>= 10), dh-golang, golang-go,
+ golang-pault-go-technicolor-dev,
  ruby-ronn,
 Standards-Version: 4.0.0
 Homepage: https://github.com/paultag/certdump
+XS-Go-Import-Path: pault.ag/go/certdump
 
 Package: certdump
 Architecture: any
