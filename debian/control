@@ -1,0 +1,19 @@
+Source: certdump
+Section: devel
+Priority: extra
+Maintainer: Paul Tagliamonte <paultag@gmail.com>
+Build-Depends: debhelper (>= 10), dh-golang, golang-go,
+ ruby-ronn,
+Standards-Version: 4.0.0
+Homepage: https://github.com/paultag/certdump
+
+Package: certdump
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+Description: client to the CYBERCOM x509 CA Server
+ cyber is the standard CYBERCOM implementation, feature complete for
+ small to moderately sized deployments. This command can read and write
+ x509 Certificates onto the Filesystem or a Yubikey, as well as preform
+ management functions, such as Certificate issuance, revocation and
+ new entity approval.

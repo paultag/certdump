@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --buildsystem=golang --with=golang
+
+override_dh_auto_build:
+	dh_auto_build
+	ronn man/certdump.md
+	rm -f man/certdump.md.1.html
+	mv man/certdump.md.1 certdump.1
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -f certdump.1
