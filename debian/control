@@ -13,9 +13,10 @@ Package: certdump
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-Description: client to the CYBERCOM x509 CA Server
- cyber is the standard CYBERCOM implementation, feature complete for
- small to moderately sized deployments. This command can read and write
- x509 Certificates onto the Filesystem or a Yubikey, as well as preform
- management functions, such as Certificate issuance, revocation and
- new entity approval.
+Description: very simple x.509 Certificate reader
+ `certdump` contains U.S. Government PIV Certificate support through the
+ `pault.ag/go/piv` library, and will extract a few PIV specific fields
+ out of the x.509 Certificate.
+ .
+ This is intended to replace basically all usage where you wind up running
+ something like `openssl x509 -in something.crt -inform der|pem -noout -text`.
