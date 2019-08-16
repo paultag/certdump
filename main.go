@@ -126,7 +126,21 @@ func printCert(cert *piv.Certificate) {
 	fmt.Printf("    Subject: %s\n", cert.Subject.String())
 
 	for _, el := range cert.Subject.Names {
-		fmt.Printf("             %s: %s\n", el.Type, el.Value)
+		elName := el.Type.String()
+
+		names := map[string]string{
+			"0.9.2342.19200300.100.1.1": "user id",
+			"1.3.6.1.4.1.12348.1.1":     "ham callsign",
+			"1.2.840.113549.1.9.1":      "email",
+		}
+
+		for k, v := range names {
+			if strings.Compare(elName, k) == 0 {
+				elName = fmt.Sprintf("%s (%s)", elName, v)
+			}
+		}
+
+		fmt.Printf("             %s: %s\n", elName, el.Value)
 	}
 	fmt.Printf("\n")
 
