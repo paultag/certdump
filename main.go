@@ -31,9 +31,6 @@ func loadCerts(path string) (*x509.CertPool, *x509.CertPool, error) {
 	var p *pem.Block
 	for {
 		p, bytes = pem.Decode(bytes)
-		if len(bytes) == 0 {
-			break
-		}
 
 		if p == nil {
 			return nil, nil, fmt.Errorf("certdump: invalid ca bundle")
@@ -56,6 +53,10 @@ func loadCerts(path string) (*x509.CertPool, *x509.CertPool, error) {
 			rootsPool.AddCert(cert)
 		} else {
 			intPool.AddCert(cert)
+		}
+
+		if len(bytes) == 0 {
+			break
 		}
 	}
 
