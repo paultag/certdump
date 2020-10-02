@@ -344,24 +344,24 @@ func main() {
 	app.Action = Main
 
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:   "ca",
-			Value:  "",
-			EnvVar: "CERTDUMP_CA_FILEPATH",
-			Usage:  "path on the filesystem to a file full of pem CAs",
+		&cli.StringFlag{
+			Name:  "ca",
+			Value: "",
+			// EnvVar: "CERTDUMP_CA_FILEPATH",
+			Usage: "path on the filesystem to a file full of pem CAs",
 		},
 
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:  "json",
 			Usage: "output cert as a JSON blob",
 		},
 
-		cli.BoolTFlag{
+		&cli.BoolFlag{
 			Name:  "text",
 			Usage: "output text from inside the cert",
 		},
 
-		cli.BoolTFlag{
+		&cli.BoolFlag{
 			Name:  "validate",
 			Usage: "validate cert and print chains",
 		},
@@ -436,7 +436,7 @@ func printChain(roots, ints *x509.CertPool, cert *x509.Certificate) {
 
 }
 
-func Main(c *cli.Context) {
+func Main(c *cli.Context) error {
 	caFilePath := c.String("ca")
 
 	validate := c.Bool("validate")
@@ -461,7 +461,7 @@ func Main(c *cli.Context) {
 
 	output := technicolor.NewTerminalWriter(os.Stdout)
 
-	for _, path := range c.Args() {
+	for _, path := range c.Args().Slice() {
 		if !quiet {
 			fmt.Printf("%s\n", path)
 		}
@@ -496,4 +496,5 @@ func Main(c *cli.Context) {
 		}
 
 	}
+	return nil
 }
